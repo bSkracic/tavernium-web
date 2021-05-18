@@ -1,137 +1,177 @@
 <template>
-  <div>
-    <!-- <h2>Welcome to the Room!</h2> -->
-    <!-- <h2 style="text-align: center;">{{ room }}</h2>
-    <div style="display: flex; justify-content: center">
-      <input type="text" v-model="room" />
-      <button v-on:click="joinRoom()">JOIN</button>
+  <!-- "https://media.wizards.com/2015/images/dnd/resources/Sword-Coast-Map_LowRes.jpg" -->
+  <main class="d-flex flex-lg-row">
+    <div id="image-container" class="flex-grow-2">
+      <img
+        src="https://i.redd.it/rd6bdlvbpw231.png"
+        style="max-height: 100vh"
+      />
     </div>
-    <br>
-    <div style="background: lightgray; height: 500px; overflow: auto;">
-      <div v-for="mess in messages" :key="mess.ID">
-        <label>{{ mess.Username }} : {{ mess.Content }}</label>
-        <br />
-      </div>
-    </div>
-    <div>
-      <input type="text" v-model="username" /> :
-      <input type="text" v-model="message" style="width: 75%"/>
-      <button v-on:click="sendMessage()" :disabled="!roomJoined" style="width: 5%">SEND</button>
-    </div>
-     -->
-    <main class="d-lg-flex">
-      <div id="image-container" style="flex: 3; ">
-        <img src="https://media.wizards.com/2015/images/dnd/resources/Sword-Coast-Map_LowRes.jpg">
-      </div>
-      <div style="flex: 1;" hidden>Image options</div>
-      <div id="message-container" style="flex: 1; background: lightgray;">
-        <div>
-          <div style="height: 100%">
-            <MessageBox :message="messageTest" />    
+    <div id="options-container" class="flex-grow-1" style="max-height: 100vh">
+      <b-tabs
+        content-class="mt-3"
+        active-nav-item-class="font-weight-bold text-danger"
+        style="max-height: 100vh; min-width: 20vw;"
+      >
+        <b-tab
+          title="Chat"
+          :title-link-class="'inactive-nav-title'"
+        >
+          <div
+            id="messageContainer"
+            style="
+              overflow-y: scroll;
+              display: block;
+              max-height: 70vh;
+              position: relative;
+              bottom: 0px;
+            "
+          >
+            <div v-for="message in messages" :key="message.id" >
+              <MessageBox :message="message" />
+            </div>  
           </div>
-        </div>
-        <MessageBoxSender :roomID="uniquestring" :nameOptions="options"/>
-      </div>
-      <!-- <b-container fluid="lg">
-        <b-row align-v="stretch">
-          <b-col lg="8" style="background: lightgray">One of three columns</b-col>
-          <b-col >One of three columns</b-col>
-          <b-col style="background: lightgray">One of three columns</b-col>
-        </b-row>
-      </b-container> -->
-    </main>
-  </div>
+          <div class="p-2">
+            <MessageBoxSender
+              :roomID="roomID"
+              :nameOptions="options"
+              :socket="socket"
+            />
+          </div>
+        </b-tab>
+        <b-tab
+          v-if="isDM"
+          title="DM Board"
+          :title-link-class="'inactive-nav-title'"
+        >
+          <div class="accordion" role="tablist">
+            <b-card no-body class="mb-1">
+              <b-card-header header-tag="header" class="p-1" role="tab">
+                <b-button block v-b-toggle.accordion-1 variant="danger"
+                  >Images</b-button
+                >
+              </b-card-header>
+              <b-collapse
+                id="accordion-1"
+                visible
+                accordion="my-accordion"
+                role="tabpanel"
+              >
+                <b-card-body>
+                  <div>
+                    <b-link >Image1_Image2</b-link>
+                  </div>
+                </b-card-body>
+              </b-collapse>
+            </b-card>
+
+            <b-card no-body class="mb-1">
+              <b-card-header header-tag="header" class="p-1" role="tab">
+                <b-button block v-b-toggle.accordion-2 variant="danger"
+                  >Character Sheets</b-button
+                >
+              </b-card-header>
+              <b-collapse
+                id="accordion-2"
+                accordion="my-accordion"
+                role="tabpanel"
+              >
+                <b-card-body>
+                  <b-card-text>xDDDD</b-card-text>
+                </b-card-body>
+              </b-collapse>
+            </b-card>
+          </div>
+        </b-tab>
+      </b-tabs>
+    </div>
+  </main>
 </template>
 
 <script>
-import MessageBoxSender from '../components/MessageBoxSender.vue';
-import MessageBox from '../components/MessageBox'
+import MessageBoxSender from "../components/MessageBoxSender.vue";
+import MessageBox from "../components/MessageBox";
+import io from "socket.io-client";
+import rest from '../axios/rest'
+
 export default {
-  components: { MessageBoxSender, MessageBox},
+  components: { MessageBoxSender, MessageBox },
   name: "Room",
   data() {
     return {
-      id: 0,
-      message: "",
-      username: "User01",
-      roomJoined: false,
-      room: null,
-      messages: [
-        {
-          ID: "0000-0000-0000-0000",
-          SenderID: "0000-0000-0000-0000",
-          GroupID: "0000-0000-0000-0000",
-          Content: "Welcome to the chat!",
-          Username: "Tavernium",
-        },
-      ],
-      options: [
-        { value: "User01", text: "User01" },
-        { value: "a", text: "Nigga" }
-      ],
-      messageTest: {
-        username: "Nigga",
-        content: "Blaze it yeet!"
-      }
+      roomID: 0,
+      isDM: false,
+      messages: [],
+      options: [],
+      socket: io("localhost:1337")
     };
   },
   created() {
-    this.$chathub.$on("message-sent", this.messageRecieved);
+    // Remove logo header
+    this.$emit("roomOpened", false);
+    // Prepare username options
+    this.options.push({
+      value: this.$cookies.get("USERNAME"),
+      text: this.$cookies.get("USERNAME"),
+    });
+    this.roomID = this.$route.params.roomID !== undefined ? this.$route.params.roomID : parseInt(this.$cookies.get("ROOM_ID"));
+    this.isDM = this.$route.params.isUserDM;
+    this.recieveMessages();
+    this.initializeSockets();
+  },
+  mounted() {
+    // does not work
+    const container = this.$el.querySelector("#messageContainer");
+    container.scrollTop = container.scrollHeight; 
   },
   beforeDestroy() {
-    this.$chathub.$off("message-sent", this.messageRecieved);
-    if (this.room !== null) {
-      this.$chathub.roomLeft(this.room);
-    }
+    this.socket.disconnect();
+    this.$emit("roomOpened", true);
   },
   methods: {
-    messageRecieved(chatMessage) {
-      chatMessage = JSON.parse(chatMessage);
-      this.messages.push(chatMessage);
-      console.log(chatMessage);
+    initializeSockets() {
+      // invoke chathub method for established connection
+      this.socket.emit("JOIN_ROOM", { room_id: this.roomID });
+
+      this.socket.on("MESSAGE", (data) => {
+        this.messages.push(data);
+        // Does not work
+        const container = this.$el.querySelector("#messageContainer");
+        container.scrollTop = container.scrollHeight;
+      });
     },
-    sendMessage() {
-      // const message = {
-      //     ID: "0000-0000-0000-0000",
-      //     SenderID: "0000-0000-0000-0000",
-      //     GroupID: "0000-0000-0000-0000",
-      //     Content: this.message,
-      //     Username: 'Nigga'
-      // }
-      this.id++;
-      const message = {
-        ID: this.id.toString(),
-        SenderID: "00",
-        GroupID: this.room,
-        Content: this.message,
-        Username: this.username,
-      };
-      this.$chathub.messageSent(JSON.stringify(message));
-    },
-    joinRoom() {
-      if (this.room !== null) {
-        this.roomJoined = true;
-        this.id++;
-        this.messages.push({
-          ID: this.id.toString(),
-          SenderID: "tavernium-defaults",
-          GroupID: this.room,
-          Content: `Joined ${this.room}!`,
-          Username: "Tavernium",
-        });
-        this.$chathub.roomJoined(this.room);
-      }
+    recieveMessages() {
+      rest.get(`/messages/room/${this.roomID}`)
+      .then(r => {
+        this.messages = r.data;
+      })
+      .catch(e => {
+        console.log(e);
+      });
     }
-  }
+  },
 };
 </script>
 
+<style>
+.inactive-nav-title {
+  color: black !important;
+}
+</style>
+
 <style scoped>
+main {
+  height: 100vh;
+  max-height: 100vh;
+}
 img {
   width: 100%;
   height: 100%;
 }
 div {
   height: 100%;
+}
+b-tab {
+  max-height: 100vh;
 }
 </style>

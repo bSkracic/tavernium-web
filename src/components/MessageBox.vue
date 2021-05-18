@@ -1,18 +1,21 @@
 <template>
-    <b-card
-        :title="message.username + ':'"
-    >
-        <b-card-text>
-            {{message.content}}
-        </b-card-text>
-    </b-card>
+  <div>
+    <h6><strong>{{ message.sender }}</strong>:</h6>
+    <p style="font-size: 15px;">{{ message.content }}</p>
+  </div>
 </template>
 
 <script>
 export default {
-    name: "MessageBox",
-    props: {
-        message: Object
-    }
-}
+  name: "MessageBox",
+  props: {
+    message: Object,
+  },
+};
 </script>
+
+<style scoped>
+div {
+    padding: 1vh;
+}
+</style>

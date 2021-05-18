@@ -1,6 +1,13 @@
 <template>
   <div>
-    <h2>Welcome back, {{ username }}!</h2>
+    <b-row center>
+      <b-col>
+      </b-col><b-col>
+      </b-col>
+      <b-col>
+        <AccountDetails />
+      </b-col>
+    </b-row>
     <main>
       <div>
         <b-tabs
@@ -18,20 +25,23 @@
               v-bind:key="campaign.id"
               style="float: left"
             >
-              <CampaignCard :campaign="campaign" />
+              <CampaignCard :campaign="campaign" :isDM="true" />
             </div>
+          <p v-if="!userCampaigns.length" style="text-align: center;">Wow, such empty.</p>
           </b-tab>
           <b-tab
             title="Other Campaigns"
             :title-link-class="'inactive-nav-title'"
           >
             <div
-              v-for="campaign in otherCampaigns"
+              v-for="campaign in joinedCampaigns"
               v-bind:key="campaign.id"
               style="float: left"
             >
-              <CampaignCard :campaign="campaign" />
+              <CampaignCard :campaign="campaign" :isDM="false" :characterSheets="sheetOptions"/>
             </div>
+          <p v-if="!joinedCampaigns.length" style="text-align: center;">Wow, such empty.</p>
+          <b-button v-b-toggle.campaign-search-sidebar variant="outline-secondary">More campaigns</b-button>
           </b-tab>
           <b-tab
             title="Character Sheets"
@@ -39,7 +49,7 @@
           >
             <div
               v-for="sheet in sheets"
-              v-bind:key="sheet.id"
+              v-bind:key="sheet.id" 
               style="float: left"
             >
               <CharacterSheetCard :sheet="sheet" style="padding: 5px" />
@@ -47,69 +57,59 @@
           </b-tab>
         </b-tabs>
       </div>
+    <b-sidebar id="campaign-search-sidebar" title="Find campaigns:" style="min-width: 30%; width: 40%; max-width: 50%;" shadow bg-variant="dark" text-variant="light">
+      <div class="px-4 py-5">
+        <b-form-input placeholder="search by name..." @input="searchCampaigns" v-model="searchTerm"></b-form-input>
+      </div>
+      <div style="color: black">
+        <div v-for="campaign in searchedCampaigns" v-bind:key="campaign.id">
+          <CampaignMini :campaign="campaign" />
+        </div>
+      </div>
+    </b-sidebar>
     </main>
   </div>
 </template> 
 
 <script>
+import CampaignMini from "../components/CampaignMini.vue"
 import CampaignCard from "../components/CampaignCard.vue";
 import CharacterSheetCard from "../components/CharacterSheetCard.vue";
+import AccountDetails from "../components/AccountDetails.vue"
+import rest from "../axios/rest";
+
 export default {
-  components: { CampaignCard, CharacterSheetCard },
+  components: { CampaignCard, CharacterSheetCard, AccountDetails, CampaignMini},
   name: "Homepage",
   data() {
     return {
-      username: "{username}",
-      userCampaigns: [
-        {
-          id: "unique-string",
-          owner: null,
-          image: "https://cdn.wallpapersafari.com/44/99/ADobB6.jpg",
-          title: "Epic campaign",
-          thematics: "epicness",
-          active: false,
-        },
-        {
-          id: "unique-string",
-          image: "https://cdn.wallpapersafari.com/44/99/ADobB6.jpg",
-          title: "Epic campaign",
-          thematics: "epicness",
-          active: false,
-        },
-      ],
-      otherCampaigns: [
-        {
-          id: "unique-string1",
-          owner: "#Nigga42069",
-          image: "https://cdn.wallpapersafari.com/44/99/ADobB6.jpg",
-          title: "Epic campaign",
-          thematics: "epicness",
-          active: false,
-        },
-      ],
-      sheets: [
-        {
-          id: "RANDOM_RANDOM_RANDOM",
-          name: "Lex",
-          level: 5,
-          image: null,
-          class: "Druid",
-          race: "High-elf",
-        },
-        {
-          id: "1RANDOM_RANDOM_RANDOM",
-          name: "Halos",
-          level: 15,
-          image:
-            "https://i.pinimg.com/736x/29/d9/d3/29d9d3d4e3bfea38d14c2dde7cba0e4f.jpg",
-          class: "Monk",
-          race: "Dragonborn",
-        },
-      ],
+      searchTerm: "",
+      searchedCampaigns: [],
+      userCampaigns: [],
+      joinedCampaigns: [],
+      sheets: [],
+      sheetOptions: [],
     };
   },
   mounted() {
-    // Check if JWT token stored expired, if yes then redirect to welcome, else load this
+    // Check if JWT is valid
+    rest.restrictedRequest(this, "GET", "/check_valid", null, (res) => {
+      if (res === null) {
+        this.$router.push("/");
+      }
+    });
+    this.retrieveCampaigns();
+  },
+  methods: {
+    retrieveCampaigns() {
+      rest.post('/campaign/user', {user_id: this.$cookies.get("USER_ID")}).then(res => this.userCampaigns = res.data).catch(e => console.log(e));
+      rest.post('/campaign/joined', {user_id: this.$cookies.get("USER_ID")}).then(res => this.joinedCampaigns = res.data).catch(e => console.log(e));
+    },
+    searchCampaigns() {
+      if(this.searchTerm.length > 2) {
+        rest.get(`/campaign/search?term=${this.searchTerm}`).then(res => {this.searchedCampaigns = res.data; console.log(res.data);}).catch(e => console.log(e));
+      }
+    }
   },
 };
 </script>

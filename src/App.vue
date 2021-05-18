@@ -1,10 +1,10 @@
 <template>
   <div id="app">
-    <div id="nav">
+    <div id="nav" v-if="this.navVisible">
       <img src="./assets/tavernium_icon.png" />
       <h1> Tavernium</h1>
     </div>
-    <router-view/>
+    <router-view v-on:roomOpened="roomOpened($event)"/>
   </div>
 </template>
 
@@ -12,7 +12,14 @@
 export default {
   data() {
     return {
-      
+      username: "",
+      userID: "",
+      navVisible: true
+    }
+  },
+  methods: {
+    roomOpened(v) {
+      this.navVisible = v;
     }
   }
 }

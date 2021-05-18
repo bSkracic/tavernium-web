@@ -53,6 +53,14 @@ export default {
       sliding: null,
     };
   },
+  created() {
+    if(this.$cookies.get("USERNAME") && this.$cookies.get("ID")) 
+    {
+      this.$userDetails.username = this.$cookies.get("USERNAME");
+      this.$userDetails.userID = this.$cookies.get("ID");
+      this.$router.push('/homepage'); 
+    }
+  },
   methods: {
     onSlideStart() {
       this.sliding = true;

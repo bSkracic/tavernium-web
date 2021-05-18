@@ -6,13 +6,23 @@
     img-alt="Campaign Image"
     img-top
     tag="article"
-    style="max-width: 20rem"
+    style="max-width: 30rem; min-width: 20rem"
     class="mb-2"
   >
     <b-card-text>
       {{ campaign.thematics }}
     </b-card-text>
-    <b-button variant="danger" v-on:click="joinCampaign">Join</b-button>
+    <b-button v-if="isDM"  variant="danger" style="width: 100%" @click="enterGame"
+      >Enter game</b-button
+    >
+    <b-button v-if="!isDM" v-b-modal.choose-cs variant="danger">Enter game</b-button>
+    <b-modal id="choose-cs" title="Choose character sheet to use in this campaign" hide-footer>
+      <b-form-select style="width: 50%" v-model="selectedCharacterSheet" :options="characterSheets"></b-form-select>
+      <br>
+      <div class="clearfix">
+        <b-button class="float-right" variant="danger" v-on:click="enterGame">Enter!</b-button>
+      </div>
+    </b-modal>
   </b-card>
 </template>
 
@@ -20,17 +30,23 @@
 export default {
   name: "CampaignCard",
   props: {
+    characterSheets: Array,
+    isDM: Boolean,
     campaign: Object,
   },
+  data() {
+    return {
+     selectedCharacterSheet: null,
+    }
+  },
   methods: {
-    launchCampaign() {
-      // TODO: send request for creating room
-      alert(`Launching campaign with and ID: ${this.campaign.id}...`);
-    },
-    joinCampaign() {
-      // TODO: join existing room
-      this.$router.push("/room");
-      alert(`Joining campaign with and ID: ${this.campaign.id}...`);
+    enterGame() {
+      this.$cookies.set("ROOM_ID", this.campaign.id);
+      console.log(this.campaign);
+      this.$router.push({
+        name: "room",
+        params: { roomID: this.campaign.id, isUserDM: this.isDM },
+      });
     },
   },
 };
