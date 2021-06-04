@@ -23,7 +23,8 @@ const restrictedRequest = (context, method, api, data, callback) => {
       callback(res);
     })
     .catch((err) => {
-      if (err !== null) {
+      console.log(err)
+      if (err.response) {
         if (
           (err.response.status === 403 || err.response.status === 401) &&
           context.$cookies.get("REFRESH_TOKEN") !== null
@@ -51,14 +52,12 @@ const restrictedRequest = (context, method, api, data, callback) => {
                 });
             })
             .catch(() => {
-              callback(null);
+              context.$router.push("/"); // Unable to obtain refresh token
             });
-        } else {
-          callback(null);
         }
       } else {
-        callback(null);
-      }
+        context.$router.push("/"); // Refersh token not found
+      } 
     });
 };
 

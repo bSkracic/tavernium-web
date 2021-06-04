@@ -1,5 +1,10 @@
 <template>
-  <b-container>
+<div>
+   <div id="nav">
+              <img src="../assets/tavernium_icon.png" />
+              <h1>Tavernium</h1>
+    </div>
+   <b-container>
     <b-row>
       <b-col lg="8" id="show-section">
         <b-carousel
@@ -40,6 +45,8 @@
       </b-col>
     </b-row>
   </b-container>
+</div>
+ 
 </template>
 
 <script>
@@ -79,5 +86,16 @@ b-carousel {
 }
 b-carousel-slide {
   max-height: 200px !important;
+}
+#nav {
+  padding: 30px;
+  display: flex;
+  justify-content: center;
+  font-family: fantasy;
+}
+
+#nav > img {
+  max-height: 50px;
+  max-width: 50px;
 }
 </style>

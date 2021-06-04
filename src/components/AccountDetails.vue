@@ -1,29 +1,35 @@
 <template>
   <div>
     <div>
-      <b-avatar :src="avatar"></b-avatar>
-      <b-dropdown :text="username" variant="outline-secondary" class="m-md-2">
+      <b-dropdown :text="username" variant="outline-secondary" class="m-md-2" style="background: white;">
         <b-dropdown-item v-on:click="showEditModal"
           >Edit account</b-dropdown-item
         >
         <b-dropdown-item v-on:click="logout">Log out</b-dropdown-item>
       </b-dropdown>
+      <b-avatar :src="avatar"></b-avatar>
     </div>
     <b-modal id="edit-acc-modal" title="Change account details" hide-footer>
       <b-avatar :src="newAvatar"></b-avatar>
-      <br />
+      <br>  
       Avatar:
-      <b-form-file
-        v-model="newAvatarFile"
-        :state="Boolean(newAvatarFile)"
-        @input="convertToBase64"
-        placeholder="Choose a file or drop it here..."
-        drop-placeholder="Drop file here..."
-      ></b-form-file>
+      <br />
+      <div style="display: flex;">
+        <b-form-file
+          style="width: 90%;"
+          v-model="newAvatarFile"
+          :state="Boolean(newAvatarFile)"
+          @input="convertToBase64"
+          placeholder="Choose a file or drop it here..."
+          drop-placeholder="Drop file here..."
+        ></b-form-file>
+        <b-button style="width: 10%;" variant="outline-danger" @click="() => {newAvatar = null; newAvatarFile = null}"><b-icon icon="trash-fill"></b-icon></b-button>
+      </div>
+      <br />
       Username:
       <b-form-input v-model="newUsername"></b-form-input>
-      <br />
-      <b-button variant="danger" v-on:click="submitDetails">Save</b-button>
+      <br>
+      <b-button variant="danger" v-on:click="submitDetails" class="float-right">Save</b-button>
       <b-spinner v-if="loading" variant="danger" label="Spinning"></b-spinner>
     </b-modal>
   </div>
@@ -36,10 +42,11 @@ export default {
   name: "AccountDetails",
   created() {
     this.username = this.$cookies.get("USERNAME");
-    const userID = this.$cookies.get("USER_ID");
-    rest.post("/acc/avatar", { user_id: userID }).then((res) => {
-      this.avatar = res.data.image;
-    });
+    rest.restrictedRequest(this, "GET", "/acc/avatar", null, (res) => {
+      if(res !== null) {
+        this.avatar = res.data.image;
+      }
+    })
   },
   data() {
     return {
@@ -60,7 +67,7 @@ export default {
       reader.readAsDataURL(this.newAvatarFile);
     },
     submitDetails() {
-      if(this.newAvatar != null && this.newUsername != null) {
+      if(this.newUsername != null) {
         this.loading = true;
         rest.restrictedRequest(
         this,

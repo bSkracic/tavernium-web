@@ -1,9 +1,5 @@
 <template>
   <div id="app">
-    <div id="nav" v-if="this.navVisible">
-      <img src="./assets/tavernium_icon.png" />
-      <h1> Tavernium</h1>
-    </div>
     <router-view v-on:roomOpened="roomOpened($event)"/>
   </div>
 </template>
