@@ -10,7 +10,7 @@
             <AccountDetails class="float-right" />
           </b-card-header>
           <b-tabs
-            card
+            card  
             vertical
             align="center"
             active-nav-item-class="font-weight-bold text-danger"
@@ -25,22 +25,12 @@
                 v-bind:key="campaign.id"
                 style="float: left"
               >
-                <CampaignCard :campaign="campaign" :isDM="true" />
+                <CampaignCard v-on:campaign-event="onCampaignEvent" :campaign="campaign" :isDM="true" />
               </div>
               <p v-if="!userCampaigns.length" style="text-align: center">
                 Wow, such empty.
               </p>
-              <b-card
-                style="max-width: 10rem; min-width: 5rem; border-radius: 20px;"
-                class="mb-2"
-              >
-                <b-button
-                  variant="danger"
-                  style="width: 100%; height: 100%"
-                  @click="newCampaign"
-                  >+</b-button
-                >
-              </b-card>
+              <NewCampaignCard  v-on:campaign-event="onCampaignEvent" ></NewCampaignCard>
             </b-tab>
             <b-tab
               title="Joined Campaigns"
@@ -90,11 +80,12 @@
                 v-bind:key="sheet.id"
                 style="float: left"
               >
-                <SheetCard :sheet="sheet" style="padding: 5px" />
+                <SheetCard v-on:sheet-event="onSheetEvent" :sheet="sheet" style="padding: 5px" />
                 <p v-if="!sheets.length" style="text-align: center">
                 Wow, such empty.
               </p>
               </div>
+              <NewSheetCard v-on:sheet-event="onSheetEvent" ></NewSheetCard>
             </b-tab>
             <b-tab
               title="Download Tavernium for Windows"
@@ -112,6 +103,8 @@
 <script>
 import CampaignMini from "../components/CampaignMini.vue";
 import CampaignCard from "../components/CampaignCard.vue";
+import NewCampaignCard from "../components/NewCampaignCard.vue"
+import NewSheetCard from "../components/NewSheetCard.vue"
 import SheetCard from "../components/SheetCard"
 import AccountDetails from "../components/AccountDetails.vue";
 import rest from "../axios/rest";
@@ -122,6 +115,8 @@ export default {
     AccountDetails,
     SheetCard,
     CampaignMini,
+    NewCampaignCard,
+    NewSheetCard
   },
   name: "Homepage",
   data() {
@@ -133,10 +128,9 @@ export default {
       sheets: []
     };
   },
-  mounted() {
+  created() {
     // Check if JWT is valid
     rest.restrictedRequest(this, "GET", "/check_valid", null, (res) => {
-      console.log(res)
       if (res === null) {
         this.$router.push("/");
       }
@@ -163,21 +157,36 @@ export default {
           })
           .then((res) => {
             this.searchedCampaigns = res.data;
-            console.log(res.data);
           })
           .catch((e) => console.log(e));
       }
-    },
-    newCampaign() {
-
     },
     retrieveSheets() {
       rest.restrictedRequest(this, "GET", "/sheets/user", null, (res) => {
         if(res !== null) {
           this.sheets = res.data;
-          console.log({sheets: this.sheets, data: res.data});
         }
       })
+    },
+    onCampaignEvent(campaign, eventType) {
+      if(eventType === 'deleted'){
+        const index = this.userCampaigns.indexOf(campaign);
+        if(index != -1) {
+          this.userCampaigns.splice(index, 1);
+        }
+      } else if(eventType === 'created'){
+        this.userCampaigns.push(campaign) 
+      }  
+    },
+    onSheetEvent(sheet, eventType) {
+      if(eventType === 'deleted'){
+        const index = this.sheets.indexOf(sheet);
+        if(index != -1) {
+          this.sheets.splice(index, 1);
+        }
+      } else if(eventType === 'created'){
+        this.sheets.push(sheet) 
+      }  
     }
   },
 };

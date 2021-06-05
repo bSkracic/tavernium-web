@@ -61,10 +61,10 @@ export default {
     };
   },
   created() {
-    if(this.$cookies.get("USERNAME") && this.$cookies.get("ID")) 
+    if(this.$cookies.get("USERNAME") && this.$cookies.get("USER_ID")) 
     {
       this.$userDetails.username = this.$cookies.get("USERNAME");
-      this.$userDetails.userID = this.$cookies.get("ID");
+      this.$userDetails.userID = this.$cookies.get("USER_ID");
       this.$router.push('/homepage'); 
     }
   },

@@ -52,11 +52,11 @@ const restrictedRequest = (context, method, api, data, callback) => {
                 });
             })
             .catch(() => {
-              context.$router.push("/"); // Unable to obtain refresh token
+              callback(null); // Unable to obtain refresh token
             });
         }
       } else {
-        context.$router.push("/"); // Refersh token not found
+        callback(null); // Refersh token not found
       } 
     });
 };
