@@ -10,7 +10,7 @@
           <b-card-body>
             <div class="container-form">
               <div>
-                <b-alert :show="loginFailed" variant="danger"
+                <b-alert :show="loginFailed" style="background-color: 4B4A67"
                   >Invalid mail or password.</b-alert
                 >
               </div>
@@ -30,7 +30,7 @@
                 >
               </div>
               <div>
-                <b-button class="btn btn-danger" v-on:click="login"
+                <b-button style="background-color: #4B4A67;" v-on:click="login"
                   >Log in!</b-button
                 >
               </div>

@@ -20,6 +20,9 @@
               active
               :title-link-class="'inactive-nav-title'"
             >
+            <div style="width: 100%; display: flex; padding-bottom: 0.5rem;">
+              <NewCampaignCard  v-on:campaign-event="onCampaignEvent" ></NewCampaignCard>
+            </div>
               <div
                 v-for="campaign in userCampaigns"
                 v-bind:key="campaign.id"
@@ -30,7 +33,6 @@
               <p v-if="!userCampaigns.length" style="text-align: center">
                 Wow, such empty.
               </p>
-              <NewCampaignCard  v-on:campaign-event="onCampaignEvent" ></NewCampaignCard>
             </b-tab>
             <b-tab
               title="Joined Campaigns"
@@ -75,6 +77,9 @@
               title="Sheets"
               :title-link-class="'inactive-nav-title'"
             >
+               <div style="width: 100%; display: flex; padding-bottom: 0.5rem;">
+                  <NewSheetCard v-on:sheet-event="onSheetEvent" ></NewSheetCard>
+               </div>
               <div
                 v-for="sheet in sheets"
                 v-bind:key="sheet.id"
@@ -85,12 +90,14 @@
                 Wow, such empty.
               </p>
               </div>
-              <NewSheetCard v-on:sheet-event="onSheetEvent" ></NewSheetCard>
             </b-tab>
             <b-tab
               title="Download Tavernium for Windows"
               :title-link-class="'inactive-nav-title'"
             >
+            <p>
+              To be added...
+            </p>
               <div>
               </div>
             </b-tab>
@@ -159,11 +166,13 @@ export default {
             this.searchedCampaigns = res.data;
           })
           .catch((e) => console.log(e));
+      } else {
+        this.searchedCampaigns = [];
       }
     },
     retrieveSheets() {
       rest.restrictedRequest(this, "GET", "/sheets/user", null, (res) => {
-        if(res !== null) {
+        if(res.data !== null) {
           this.sheets = res.data;
         }
       })
@@ -176,7 +185,15 @@ export default {
         }
       } else if(eventType === 'created'){
         this.userCampaigns.push(campaign) 
-      }  
+      }  else if(eventType === 'modified') {
+        this.userCampaigns = this.userCampaigns.map(c => {
+          if(c.id == campaign.id) {
+            return campaign;
+          } else {
+            return c
+          }
+        });
+      }
     },
     onSheetEvent(sheet, eventType) {
       if(eventType === 'deleted'){
@@ -186,7 +203,15 @@ export default {
         }
       } else if(eventType === 'created'){
         this.sheets.push(sheet) 
-      }  
+      } else if(eventType === 'modified') {
+        this.sheets = this.sheets.map(s => {
+          if(s.id == sheet.id) {
+            return sheet;
+          } else {
+            return s
+          }
+        });
+      }
     }
   },
 };
@@ -218,7 +243,6 @@ li {
   padding: 30px;
   display: flex;
   justify-content: center;
-  font-family: fantasy;
 }
 
 #nav > img {

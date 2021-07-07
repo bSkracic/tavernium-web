@@ -1,13 +1,11 @@
 <template>
-  <b-card
-    style="max-width: 10rem; min-width: 5rem; border-radius: 20px"
-    class="mb-2"
+  <div
+    style="width: 20rem;" 
   >
     <b-button
-      variant="danger"
-      style="width: 100%; height: 100%"
+      style="background-color: #4B4A67; width: 50%; height: 100%"
       @click="showModal()"
-      >+</b-button
+      >New campaign</b-button
     >
     <b-modal
       id="new-campaign"
@@ -23,14 +21,14 @@
         </b-form-group>
         <b-button
           class="mt-2"
-          variant="outline-danger"
+          style="background-color: #4b4a67;"
           block
           @click="submitChanges"
           >Save</b-button
         >
       </form>
     </b-modal>
-  </b-card>
+  </div>
 
 </template>
 

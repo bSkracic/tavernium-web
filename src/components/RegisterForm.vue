@@ -14,7 +14,7 @@
           <input type="password" placeholder="password..." v-model="password" />
         </div>
         <div>
-          <b-button class="btn btn-danger" v-on:click="register"
+          <b-button style="background-color: #4B4A67;" v-on:click="register"
             >Create an account!</b-button
           >
         </div>
@@ -45,7 +45,17 @@ export default {
           password: this.password,
         })
         .then(() => {
-          this.$router.push('/homepage');
+          rest.axiosInstanceAuth.post("/login", {
+            email: this.mail,
+            password: this.password,
+            remember: true
+          }).then(res => {
+            this.$cookies.set("USERNAME", res.data.username);
+            this.$cookies.set("USER_ID", res.data.user_id);
+            this.$cookies.set("ACCESS_TOKEN", res.data.access_token);
+            this.$cookies.set("REFRESH_TOKEN", res.data.refresh_token);
+            this.$router.push('/homepage');
+          });
         }).catch(() => {
           this.registerFailed = true;
         })

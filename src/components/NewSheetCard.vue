@@ -1,13 +1,11 @@
 <template>
-    <b-card
-    style="max-width: 10rem; min-width: 5rem; border-radius: 20px"
-    class="mb-2"
+     <div
+    style="width: 20rem;" 
   >
     <b-button
-      variant="danger"
-      style="width: 100%; height: 100%"
+      style="background-color: #4B4A67; width: 50%; height: 100%"
       @click="showModal"
-      >+</b-button
+      >New sheet</b-button
     >
     <b-modal
       size="lg"
@@ -130,9 +128,9 @@
           </div>
         </b-card>
         <br />
-        <b-button class="float-right" variant="danger" style="width: 25%" @click="submitChanges">Create</b-button>
+        <b-button class="float-right" style="background-color: #4b4a67; width: 25%" @click="submitChanges">Create</b-button>
     </b-modal>
-  </b-card>
+  </div>
 
 </template>
 

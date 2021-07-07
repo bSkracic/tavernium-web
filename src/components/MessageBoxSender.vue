@@ -1,16 +1,19 @@
 <template>
-    <div>
-        <div>
-             <textarea name="" v-model="message" cols="30" rows="2" style="width: 100%;"></textarea>
+    <div class="d-md-flex" style="justify-content: center;">
+        <div class="d-md-flex" style="width: 50%;  padding: 2rem;">
+            <textarea name="" v-model="message" cols="30" rows="2" style="width: 80%;"></textarea>
+            <div style="width: 50%;">
+                <div style="width: 25%;">
+                </div>
+                <div style="width: 60%;">
+                    <div class="d-md-flex" style="justify-content: space-around">
+                        <label style="padding: 5px">As </label>
+                        <b-form-select style="width: 90%" v-model="selectedName" :options="nameOptions"></b-form-select>
+                    </div>
+                    <b-button style="background-color: #4B4A67; width: 100%;" @click="sendMessage"><b-icon icon="play"></b-icon>Send</b-button>
+                </div>
+            </div>      
         </div>
-        <br>
-        <div class="d-md-flex">
-             <label style="padding: 5px">As </label>
-             <b-form-select style="width: 50%" v-model="selectedName" :options="nameOptions"></b-form-select>
-             <div style="padding-left: 15px;">
-                <b-button class="btn btn-danger" @click="sendMessage">Send</b-button>
-             </div>
-        </div>      
     </div>
 </template>
 

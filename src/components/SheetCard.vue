@@ -14,8 +14,8 @@
             <hr>
         </b-list-group>
         <div>
-          <b-button variant="danger" class="float-left" style="width: 25%" @click="showDeleteModal"><b-icon icon="trash-fill" ></b-icon></b-button>
-          <b-button variant="danger" class="float-right" style="width: 25%" @click="showEditModal"><b-icon icon="pencil-fill" ></b-icon></b-button>
+          <b-button variant="outline-danger" class="float-left" style="width: 25%" @click="showDeleteModal"><b-icon icon="trash-fill" ></b-icon></b-button>
+          <b-button class="float-right" style="background-color: #7e8987; width: 25%" @click="showEditModal"><b-icon icon="pencil-fill" ></b-icon></b-button>
         </div>
     </b-card-text>
     <b-modal
@@ -155,7 +155,7 @@
           </div>
         </b-card>
         <br />
-        <b-button class="float-right" variant="danger" style="width: 25%" @click="editSheet">Save</b-button>
+        <b-button class="float-right" style="background-color: #4b4a67; width: 25%" @click="editSheet">Save</b-button>
     </b-modal>
   </b-card>
 </template>
@@ -210,8 +210,10 @@ export default {
       })
     },
     editSheet() {
+      console.log(this.sheetCopy);
       rest.restrictedRequest(this, 'PUT', '/sheets/edit', this.sheetCopy, () => {
         this.$bvModal.hide(`edit-sheet-${this.sheet.id}`);
+        this.$emit('sheet-event', this.sheetCopy, 'modified');
       })
     }
   } 

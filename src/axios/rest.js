@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:1337/api/v1";
-const AUTH_API_URL = "http://localhost:6969/api/auth";
+const API_URL = "http://localhost:8000/api/v1";
+const AUTH_API_URL = "http://localhost:8001/api/auth";
 
 const axiosInstance = axios.create({ baseURL: API_URL });
 const axiosInstanceAuth = axios.create({ baseURL: AUTH_API_URL });
@@ -23,7 +23,6 @@ const restrictedRequest = (context, method, api, data, callback) => {
       callback(res);
     })
     .catch((err) => {
-      console.log(err)
       if (err.response) {
         if (
           (err.response.status === 403 || err.response.status === 401) &&

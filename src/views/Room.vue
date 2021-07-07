@@ -1,73 +1,49 @@
 <template>
-  <!-- "https://media.wizards.com/2015/images/dnd/resources/Sword-Coast-Map_LowRes.jpg" -->
-  <main class="d-flex flex-lg-row">
-    <div id="image-container" class="flex-grow-2">
-      <img
-        src="https://i.redd.it/rd6bdlvbpw231.png"
-        style="max-height: 100vh"
-      />
-    </div>
-    <div id="options-container" class="flex-grow-1" style="max-height: 100vh">
+  <main class="d-flex flex-lg-row" style="padding: 2rem 5rem 2rem 5rem">
+    <div id="options-container" class="flex-grow-1" style="max-height: 100vh;">
       <b-tabs
         content-class="mt-3"
         active-nav-item-class="font-weight-bold text-danger"
-        style="max-height: 100vh; min-width: 20vw;"
+        style="max-height: 80vh; min-width: 20vw;"
       >
         <b-tab
           title="Chat"
           :title-link-class="'inactive-nav-title'"
         >
-          <div
+          <div class="d-md-flex" style="flex-direction: column;">
+            <div
             id="messageContainer"
             style="
               overflow-y: scroll;
               display: block;
-              max-height: 70vh;
-              position: relative;
-              bottom: 0px;
+              max-height: 77vh;
+              background-color: #DDD1C7;
             "
           >
-            <div v-for="message in messages" :key="message.id" >
+            <div v-for="message in messages" :key="message.id">
               <MessageBox :message="message" />
             </div>  
           </div>
-          <div class="p-2">
+          <div style="justify-self: flex-end;;">
             <MessageBoxSender
               :roomID="roomID"
               :nameOptions="options"
               :socket="socket"
             />
           </div>
+          </div>
         </b-tab>
         <b-tab
-          v-if="isDM"
+          v-if="isDM === true"
           title="DM Board"
           :title-link-class="'inactive-nav-title'"
         >
           <div class="accordion" role="tablist">
-            <b-card no-body class="mb-1">
-              <b-card-header header-tag="header" class="p-1" role="tab">
-                <b-button block v-b-toggle.accordion-1 variant="danger"
-                  >Images</b-button
-                >
-              </b-card-header>
-              <b-collapse
-                id="accordion-1"
-                visible
-                accordion="my-accordion"
-                role="tabpanel"
-              >
-                <b-card-body>
-                  <div>
-                    <b-link >Image1_Image2</b-link>
-                  </div>
-                </b-card-body>
-              </b-collapse>
-            </b-card>
+          
 
             <b-card no-body class="mb-1">
               <b-card-header header-tag="header" class="p-1" role="tab">
-                <b-button block v-b-toggle.accordion-2 variant="danger"
+                <b-button block v-b-toggle.accordion-2 style="background-color: #4B4A67;"
                   >Character Sheets</b-button
                 >
               </b-card-header>
@@ -77,7 +53,9 @@
                 role="tabpanel"
               >
                 <b-card-body>
-                  <b-card-text>xDDDD</b-card-text>
+                  <div v-for="sheet in playerSheets" :key="sheet.id">
+                    <label>{{sheet.name}}</label>
+                  </div>
                 </b-card-body>
               </b-collapse>
             </b-card>
@@ -103,7 +81,8 @@ export default {
       isDM: false,
       messages: [],
       options: [],
-      socket: io("localhost:1337")
+      playerSheets: [],
+      socket: io("localhost:8000")
     };
   },
   created() {
@@ -114,15 +93,22 @@ export default {
       value: this.$cookies.get("USERNAME"),
       text: this.$cookies.get("USERNAME"),
     });
-    this.roomID = this.$route.params.roomID !== undefined ? this.$route.params.roomID : parseInt(this.$cookies.get("ROOM_ID"));
-    this.isDM = this.$route.params.isUserDM;
+    
+    this.roomID = parseInt(this.$cookies.get("ROOM_ID"));
+    this.isDM = JSON.parse(this.$cookies.get("IS_DM").toLowerCase());
+    console.log(this.$cookies.get("IS_DM"))
+    
+    if(this.isDM) {
+      this.recieveSheets();
+    }
+
     this.recieveMessages();
     this.initializeSockets();
   },
   mounted() {
     // does not work
     const container = this.$el.querySelector("#messageContainer");
-    container.scrollTop = container.scrollHeight; 
+    container.scrollTop = container.scrollHeight  - 20; 
   },
   beforeDestroy() {
     this.socket.disconnect();
@@ -135,19 +121,27 @@ export default {
 
       this.socket.on("MESSAGE", (data) => {
         this.messages.push(data);
-        // Does not work
-        const container = this.$el.querySelector("#messageContainer");
-        container.scrollTop = container.scrollHeight;
+        this.scrollToBottom();
       });
+    },
+    recieveSheets() {
+      rest.get(`/campaign/sheets/${this.roomID}`).then(res => {
+        this.playerSheets = res.data;
+      })
     },
     recieveMessages() {
       rest.get(`/messages/room/${this.roomID}`)
       .then(r => {
         this.messages = r.data;
+        this.scrollToBottom();
       })
       .catch(e => {
         console.log(e);
       });
+    },
+    scrollToBottom() {
+       const container = this.$el.querySelector("#messageContainer");
+      container.scrollTop = container.scrollHeight;
     }
   },
 };

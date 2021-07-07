@@ -34,7 +34,6 @@ export default {
   padding: 30px;
   display: flex;
   justify-content: center;
-  font-family: fantasy;
 }
 
 #nav > img {

@@ -60,14 +60,14 @@ export default {
       sliding: null,
     };
   },
-  created() {
-    if(this.$cookies.get("USERNAME") && this.$cookies.get("USER_ID")) 
-    {
-      this.$userDetails.username = this.$cookies.get("USERNAME");
-      this.$userDetails.userID = this.$cookies.get("USER_ID");
-      this.$router.push('/homepage'); 
-    }
-  },
+  // created() {
+  //   if(this.$cookies.get("USERNAME") && this.$cookies.get("USER_ID")) 
+  //   {
+  //     this.$userDetails.username = this.$cookies.get("USERNAME");
+  //     this.$userDetails.userID = this.$cookies.get("USER_ID");
+  //     this.$router.push('/homepage'); 
+  //   }
+  // },
   methods: {
     onSlideStart() {
       this.sliding = true;
@@ -91,7 +91,6 @@ b-carousel-slide {
   padding: 30px;
   display: flex;
   justify-content: center;
-  font-family: fantasy;
 }
 
 #nav > img {
